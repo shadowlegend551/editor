@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <termios.h>
 
+#include "sharedstate.h"
+
 
 void raw_mode_enable()
 {
