@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <termios.h>
 
-#include "sharedstate.h"
+#include "inputprocessing.h"
 
 
 void raw_mode_enable()
@@ -26,25 +26,25 @@ void raw_mode_disable()
 
 int main()
 {
-    raw_mode_enable();
-    char ch;
-    int read_characters = 0;
-    int buffer_index = 0;
-    char buffer[8];
+    Instruction* instruction;
+    setvbuf(stdout, NULL, _IONBF, 0);
+    pthread_mutex_init(&backend_lock, NULL);
+
+    instruction = init_backend();
+
     while(1)
     {
-        read_characters = read(STDIN_FILENO, &ch, 1);
-        if(read_characters)
+        pthread_mutex_lock(&backend_lock);
+        if(instruction->type == NONE && instruction->next_instruction)
         {
-            buffer[buffer_index] = ch;
-            buffer_index++;
-            if(buffer_index > 7)
-            {
-                buffer[buffer_index] = '\0';
-                printf("%s\n", buffer);
-                buffer_index = 0;
-            }
+            instruction = instruction->next_instruction;
         }
+        else if(instruction->type == CHARACTER)
+        {
+            printf("%c", *(char*)(instruction->context));
+            instruction->type = NONE;
+        }
+        pthread_mutex_unlock(&backend_lock);
     }
 
     return 0;
