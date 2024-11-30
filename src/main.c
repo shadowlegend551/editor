@@ -44,12 +44,12 @@ int main()
         }
         else if(instruction->type == CHARACTER)
         {
-            printf("%c", *(char*)(instruction->context));
+            printf("%c", *(instruction->context));
             instruction->type = NONE;
         }
         else if(instruction->type == CURSOR)
         {
-            printf("%s", (char*)(instruction->context));
+            printf("%s", instruction->context);
             instruction->type = NONE;
         }
         pthread_mutex_unlock(&backend_lock);

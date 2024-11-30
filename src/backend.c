@@ -15,7 +15,7 @@
 
 pthread_mutex_t backend_lock;
 
-Instruction* init_instruction(InstructionType type, void* context)
+Instruction* init_instruction(InstructionType type, char* context)
 {
     Instruction* instruction = malloc(sizeof(Instruction));
     instruction->type = type;
@@ -62,7 +62,7 @@ void* backend_loop(void* argv)
             else if(ch != 0x1b)
             {
                 context = malloc(1);
-                *(char*)context = ch;
+                *context = ch;
                 new_instruction = init_instruction(CHARACTER, context);
             }
 
