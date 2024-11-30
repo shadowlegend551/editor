@@ -8,6 +8,7 @@ extern pthread_mutex_t backend_lock;
 
 typedef enum InstructionType
 {
+    ERROR,
     NONE,
     CHARACTER,
     CURSOR,
