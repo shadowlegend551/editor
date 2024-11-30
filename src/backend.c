@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <termios.h>
 
-#include "inputprocessing.h"
+#include "backend.h"
 
 
 #define ANSI_CODE_BUFFER_LEN 17

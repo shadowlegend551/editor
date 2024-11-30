@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <termios.h>
 
-#include "inputprocessing.h"
+#include "backend.h"
 
 
 void raw_mode_enable()

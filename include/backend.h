@@ -1,5 +1,5 @@
-#ifndef INPUTPROCESSING_H
-#define INPUTPROCESSING_H
+#ifndef BACKEND_H
+#define BACKEND_H
 
 #include <pthread.h>
 
