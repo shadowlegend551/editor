@@ -44,7 +44,6 @@ void* backend_loop(void* argv)
             head_instruction = new_instruction;
         }
     }
-
 }
 
 
@@ -58,11 +57,14 @@ Instruction* init_backend()
 
     // Create the initial instruction.
     Instruction* base_instruction = malloc(sizeof(Instruction));
+    if(!base_instruction) return NULL;
     base_instruction->next_instruction = NULL;
     base_instruction->context = NULL;
     base_instruction->type = NONE;
 
+    // Initialize mutex and thread.
     pthread_t backend_thread;
+    pthread_mutex_init(&backend_lock, NULL);
     pthread_create(&backend_thread, NULL, backend_loop, base_instruction);
 
     return base_instruction;

@@ -26,9 +26,9 @@ void raw_mode_disable()
 
 int main()
 {
+    Instruction* old_instruction;
     Instruction* instruction;
     setvbuf(stdout, NULL, _IONBF, 0);
-    pthread_mutex_init(&backend_lock, NULL);
 
     instruction = init_backend();
 
@@ -37,7 +37,10 @@ int main()
         pthread_mutex_lock(&backend_lock);
         if(instruction->type == NONE && instruction->next_instruction)
         {
+            old_instruction = instruction;
             instruction = instruction->next_instruction;
+            free(old_instruction->context);
+            free(old_instruction);
         }
         else if(instruction->type == CHARACTER)
         {
