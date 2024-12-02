@@ -12,6 +12,8 @@
 #define ANSI_CODE_MAX_LEN 15
 #define ANSI_ESCAPE_CHAR 0x1b
 
+char BACKSPACE_CHAR[3] = {0x08, 0x20, 0x08};
+
 
 pthread_mutex_t backend_lock;
 
@@ -59,11 +61,16 @@ void* backend_loop(void* argv)
                 new_instruction = init_instruction(CURSOR, context);
             }
 
-            else if(ch != 0x1b)
+            else if(0x20 <= ch && ch <= 0x7e)
             {
                 context = malloc(1);
                 *context = ch;
-                new_instruction = init_instruction(CHARACTER, context);
+                new_instruction = init_instruction(PRINTABLE_CHAR, context);
+            }
+
+            else if(ch == 0x7f)
+            {
+                new_instruction = init_instruction(BACKSPACE, NULL);
             }
 
         append_instruction:

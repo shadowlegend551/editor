@@ -42,7 +42,7 @@ int main()
             free(old_instruction->context);
             free(old_instruction);
         }
-        else if(instruction->type == CHARACTER)
+        else if(instruction->type == PRINTABLE_CHAR)
         {
             printf("%c", *(instruction->context));
             instruction->type = NONE;
@@ -50,6 +50,11 @@ int main()
         else if(instruction->type == CURSOR)
         {
             printf("%s", instruction->context);
+            instruction->type = NONE;
+        }
+        else if(instruction->type == BACKSPACE)
+        {
+            write(STDOUT_FILENO, BACKSPACE_CHAR, 3);
             instruction->type = NONE;
         }
         pthread_mutex_unlock(&backend_lock);
