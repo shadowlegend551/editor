@@ -44,7 +44,7 @@ int main()
         }
         else if(instruction->type == PRINTABLE_CHAR)
         {
-            printf("%c", *(instruction->context));
+            write(STDOUT_FILENO, instruction->context, 1);
             instruction->type = NONE;
         }
         else if(instruction->type == CURSOR)
