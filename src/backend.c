@@ -44,6 +44,7 @@ void* backend_loop(void* argv)
         {
             if(ch == ANSI_ESCAPE_CHAR)
             {
+                printf("here\n");
                 read_characters = read(STDIN_FILENO, ansi_code+1, ANSI_CODE_MAX_LEN);
 
                 // If no escape code was found.
