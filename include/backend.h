@@ -37,7 +37,7 @@ typedef struct Instruction
 } Instruction;
 
 
-Instruction* init_instruction(InstructionType type, char* context);
+Instruction* init_instruction(InstructionType type, Context context);
 
 void* backend_loop(void* argv);
 
