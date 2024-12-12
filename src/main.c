@@ -27,6 +27,8 @@ void raw_mode_disable()
 
 int main()
 {
+    char context_char;
+    char* context_string;
     Instruction* old_instruction;
     Instruction* instruction;
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -48,12 +50,14 @@ int main()
             break;
 
         case PRINTABLE_I:
-            write(STDOUT_FILENO, instruction->context, 1);
+            context_char = instruction->context.character;
+            write(STDOUT_FILENO, context_char, 1);
             instruction->type = NONE_I;
             break;
 
         case CURSOR_I:
-            printf("%s", instruction->context);
+            context_string = instruction->context.string;
+            printf("%s", context_string);
             instruction->type = NONE_I;
             break;
 
