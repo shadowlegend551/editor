@@ -45,13 +45,12 @@ int main()
             if(!instruction->next_instruction) break;
             old_instruction = instruction;
             instruction = instruction->next_instruction;
-            free(old_instruction->context);
             free(old_instruction);
             break;
 
         case PRINTABLE_I:
             context_char = instruction->context.character;
-            write(STDOUT_FILENO, context_char, 1);
+            write(STDOUT_FILENO, &context_char, 1);
             instruction->type = NONE_I;
             break;
 
