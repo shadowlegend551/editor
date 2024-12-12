@@ -6,16 +6,15 @@
 
 extern pthread_mutex_t backend_lock;
 
-extern char BACKSPACE_CHAR[3];
-
 typedef enum InstructionType
 {
-    ERROR,
-    NONE,
-    PRINTABLE_CHAR,
-    BACKSPACE,
-    CURSOR,
-    COMMAND
+    ERROR_I,
+    NONE_I,
+    PRINTABLE_I,
+    BACKSPACE_I,
+    CURSOR_I,
+    COMMAND_I,
+    ESCAPE_I
 
 } InstructionType;
 

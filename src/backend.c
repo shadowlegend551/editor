@@ -6,13 +6,12 @@
 #include <termios.h>
 
 #include "backend.h"
+#include "controlstrings.h"
 
 
 #define ANSI_CODE_BUFFER_LEN 17
 #define ANSI_CODE_MAX_LEN 15
 #define ANSI_ESCAPE_CHAR 0x1b
-
-char BACKSPACE_CHAR[3] = {0x08, 0x20, 0x08};
 
 
 pthread_mutex_t backend_lock;
@@ -25,6 +24,30 @@ Instruction* init_instruction(InstructionType type, char* context)
     instruction->next_instruction = NULL;
 
     return instruction;
+}
+
+
+Instruction* parse_ansi()
+{
+    char ansi_code[ANSI_CODE_BUFFER_LEN];
+    ansi_code[0] = ANSI_ESCAPE_CHAR;
+
+    Instruction* new_instruction;
+    int read_characters = read(STDIN_FILENO, ansi_code+1, ANSI_CODE_MAX_LEN);
+
+    // If no escape code was found.
+    if(!read_characters)
+    {
+        new_instruction = init_instruction(ERROR_I, NULL);
+    }
+
+    // Null terminate and copy the string.
+    ansi_code[read_characters+1] = '\0';
+    char* context = malloc(read_characters+2);
+    strcpy(context, ansi_code);
+
+    new_instruction = init_instruction(CURSOR_I, context);
+    return new_instruction;
 }
 
 
@@ -44,34 +67,18 @@ void* backend_loop(void* argv)
         {
             if(ch == ANSI_ESCAPE_CHAR)
             {
-                printf("here\n");
-                read_characters = read(STDIN_FILENO, ansi_code+1, ANSI_CODE_MAX_LEN);
-
-                // If no escape code was found.
-                if(!read_characters)
-                {
-                    init_instruction(ERROR, NULL);
-                    goto append_instruction;
-                }
-
-                // Null terminate and copy the string.
-                ansi_code[read_characters+1] = '\0';
-                context = malloc(read_characters+2);
-                strcpy(context, ansi_code);
-
-                new_instruction = init_instruction(CURSOR, context);
+                new_instruction = parse_ansi();
             }
-
             else if(0x20 <= ch && ch <= 0x7e)
             {
                 context = malloc(1);
                 *context = ch;
-                new_instruction = init_instruction(PRINTABLE_CHAR, context);
+                new_instruction = init_instruction(PRINTABLE_I, context);
             }
 
             else if(ch == 0x7f)
             {
-                new_instruction = init_instruction(BACKSPACE, NULL);
+                new_instruction = init_instruction(BACKSPACE_I, NULL);
             }
 
         append_instruction:
@@ -98,7 +105,7 @@ Instruction* init_backend()
     if(!base_instruction) return NULL;
     base_instruction->next_instruction = NULL;
     base_instruction->context = NULL;
-    base_instruction->type = NONE;
+    base_instruction->type = NONE_I;
 
     // Initialize mutex and thread.
     pthread_t backend_thread;

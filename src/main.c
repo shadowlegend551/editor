@@ -4,6 +4,7 @@
 #include <termios.h>
 
 #include "backend.h"
+#include "controlstrings.h"
 
 
 void raw_mode_enable()
@@ -35,28 +36,33 @@ int main()
     while(1)
     {
         pthread_mutex_lock(&backend_lock);
-        if(instruction->type == NONE && instruction->next_instruction)
+
+        switch(instruction->type)
         {
+        case NONE_I:
+            if(!instruction->next_instruction) break;
             old_instruction = instruction;
             instruction = instruction->next_instruction;
             free(old_instruction->context);
             free(old_instruction);
-        }
-        else if(instruction->type == PRINTABLE_CHAR)
-        {
+            break;
+
+        case PRINTABLE_I:
             write(STDOUT_FILENO, instruction->context, 1);
-            instruction->type = NONE;
-        }
-        else if(instruction->type == CURSOR)
-        {
+            instruction->type = NONE_I;
+            break;
+
+        case CURSOR_I:
             printf("%s", instruction->context);
-            instruction->type = NONE;
+            instruction->type = NONE_I;
+            break;
+
+        case BACKSPACE_I:
+            write(STDOUT_FILENO, BACKSPACE, 3);
+            instruction->type = NONE_I;
+            break;
         }
-        else if(instruction->type == BACKSPACE)
-        {
-            write(STDOUT_FILENO, BACKSPACE_CHAR, 3);
-            instruction->type = NONE;
-        }
+
         pthread_mutex_unlock(&backend_lock);
     }
 
