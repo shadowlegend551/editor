@@ -16,7 +16,7 @@
 
 pthread_mutex_t backend_lock;
 
-Instruction* init_instruction(InstructionType type, char* context)
+Instruction* init_instruction(InstructionType type, Context context)
 {
     Instruction* instruction = malloc(sizeof(Instruction));
     instruction->type = type;
@@ -29,6 +29,7 @@ Instruction* init_instruction(InstructionType type, char* context)
 
 Instruction* parse_ansi()
 {
+    Context context;
     char ansi_code[ANSI_CODE_BUFFER_LEN];
     ansi_code[0] = ANSI_ESCAPE_CHAR;
 
@@ -38,13 +39,14 @@ Instruction* parse_ansi()
     // If no escape code was found.
     if(!read_characters)
     {
-        new_instruction = init_instruction(ERROR_I, NULL);
+        context.string = 0;
+        new_instruction = init_instruction(ERROR_I, context);
     }
 
     // Null terminate and copy the string.
     ansi_code[read_characters+1] = '\0';
-    char* context = malloc(read_characters+2);
-    strcpy(context, ansi_code);
+    context.string = malloc(read_characters+2);
+    strcpy(context.string, ansi_code);
 
     new_instruction = init_instruction(CURSOR_I, context);
     return new_instruction;
@@ -53,7 +55,7 @@ Instruction* parse_ansi()
 
 void* backend_loop(void* argv)
 {
-    char* context;
+    Context context;
     Instruction* new_instruction;
     Instruction* head_instruction = argv;
     char ch = 0;
@@ -65,20 +67,20 @@ void* backend_loop(void* argv)
     {
         if(read(STDIN_FILENO, &ch, 1))
         {
+            context.string = 0;
             if(ch == ANSI_ESCAPE_CHAR)
             {
                 new_instruction = parse_ansi();
             }
             else if(0x20 <= ch && ch <= 0x7e)
             {
-                context = malloc(1);
-                *context = ch;
+                context.character = ch;
                 new_instruction = init_instruction(PRINTABLE_I, context);
             }
 
             else if(ch == 0x7f)
             {
-                new_instruction = init_instruction(BACKSPACE_I, NULL);
+                new_instruction = init_instruction(BACKSPACE_I, context);
             }
 
         append_instruction:
@@ -101,11 +103,10 @@ Instruction* init_backend()
     tcsetattr(STDIN_FILENO, TCSANOW, &input);
 
     // Create the initial instruction.
-    Instruction* base_instruction = malloc(sizeof(Instruction));
+    Context context;
+    context.string = 0;
+    Instruction* base_instruction = init_instruction(NONE_I, context);
     if(!base_instruction) return NULL;
-    base_instruction->next_instruction = NULL;
-    base_instruction->context = NULL;
-    base_instruction->type = NONE_I;
 
     // Initialize mutex and thread.
     pthread_t backend_thread;
