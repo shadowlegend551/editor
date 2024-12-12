@@ -19,16 +19,22 @@ typedef enum InstructionType
 } InstructionType;
 
 
-typedef struct Instruction Instruction;
+typedef union Context
+{
+    char    character;
+    char*   string;
 
+} Context;
+
+
+typedef struct Instruction Instruction;
 typedef struct Instruction
 {
     InstructionType type;
-    char* context;
-    Instruction* next_instruction;
+    Context         context;
+    Instruction*    next_instruction;
 
 } Instruction;
-
 
 
 Instruction* init_instruction(InstructionType type, char* context);
